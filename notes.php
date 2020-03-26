@@ -6815,29 +6815,644 @@
             </bladeAndJavaScriptFrameworks>
         </displayingData>
         <controlStructures>
-            In addition to template inheritance and displaying data, Blade also provides convenient shortcuts for
-            <ifStatements></ifStatements>
-            <switchStatements></switchStatements>
-            <loops></loops>
-            <theLoopVariable></theLoopVariable>
-            <comments></comments>
-            <PHP></PHP>
+            In addition to template inheritance and displaying data, Blade also provides convenient shortcuts for common
+            PHP control structures, such as conditional statements and loops. Thesee shortcuts provide a very     clean,
+            terse way of working with PHP control structures, while also remaining familiar to their PHP counterparts.
+
+            <ifStatements>
+                You may construct if statements using the @if, @elseif, @else, and @endif directives. These directives
+                function identically to thir PHP counterparts:
+
+                    <!--
+                        @if (count($records) === 1)
+                            I have one record!
+                        @elseif (count($records) > 1)
+                            I have multiple records!
+                        @else
+                            I don't have any records!
+                        @endif
+                    -->
+
+                For convenience, Blade also provides an @unless directive:
+
+                <!--
+                    @unless(Auth::check())
+                        you are not signed in.
+                    @endunless
+                -->
+
+                In addition to the conditional directives already discussed, the @isset and @empty directives may
+                be used as convenient shortcuts for their respective PHP function:
+
+                <!--
+                    @isset($records)
+                        // $records is defined and is not null...
+                    @endisset
+
+                    @empty($records)
+                        // $records is "empty"...
+                    @endempty
+                -->
+
+                Authentication Directives
+                The @auth and @guest directives may be used to quickly determine if the current user is authenticated or
+                is a guest:
+
+                <!--
+                    @auth
+                        // The user is authenticated...
+                    @endauth
+
+                    @guest
+                        // The user is not authenticated...
+                    @endguest
+                -->
+
+                If needed, you may specify the authentication guard that should be checked when using the @auth
+                and @guest directives:
+
+                <!--
+                    @auth('admin')
+                        // The user is authenticated...
+                    @endauth
+
+                    @guest('admin')
+                        // The user is not authenticated...
+                    @endguest
+                -->
+
+                Section Directives
+                You may check if a section has content using the @hasSection directive:
+
+                <!--
+                    @hasSection('navigation')
+                        <div class="pull-right">
+                            @yield('navigation')
+                        </div>
+
+                        <div class="clearfix"></div>
+                    @endif
+                -->
+
+            </ifStatements>
+            <switchStatements>
+                Switch statements can be constructed using the @switch, @case, @break, @default and @endswitch directives:
+
+                <!--
+                    @switch($i)
+                        @case(1)
+                            First case...
+                            @break
+
+                        @case(2)
+                            Second case...
+                            @break
+
+                        @default
+                            Default case...
+                    @endswitch
+                -->
+            </switchStatements>
+            <loops>
+                In addition to conditional statements, Blade provides simple directives for working with PHP's loop
+                structures. Again, each of these directives functions identically to their PHP counterparts:
+
+                <!--
+                    @for ($i = 0; $i < 10; $i++)
+                        The current value is {{ $i }}
+                    @endfor
+
+                    @foreach ($users as $user)
+                        <p>This is user {{ $user->id }}</p>
+                    @endforeach
+
+                    @forelse ($users as $user)
+                        <li>{{ $user->name }}</li>
+                    @empty
+                        <p>No users</p>
+                    @endforelse
+
+                    @while (true)
+                        <p>I'm looping forever.</p>
+                    @endwhile
+                -->
+
+                <NOTE>
+                    When looping, you may use the loop variable to gain valuable information about the loop, such as
+                    whether you are in the first or last iteration through the loop.
+                </NOTE>
+
+                You may also include the condition with the directive declaration in one line:
+
+                <!--
+                    @foreach ($users as $user)
+                        @continue($user->type == 1)
+
+                        <li>{{ $user->name }}</li>
+
+                        @break($user->number == 5)
+                    @endforeach
+                -->
+
+            </loops>
+            <theLoopVariable>
+                When looping, a $loop variable will be available inside of your loop. This variable provides access to
+                some useful bits of information such as the current loop index and whether this is the first or   last
+                iteration through the loop:
+
+                <!--
+                    @foreach ($users as $user)
+                        @if ($loop->first)
+                            This is the first iteration.
+                        @endif
+
+                        @if ($loop->last)
+                            This is the last iteration.
+                        @endif
+
+                        <p>This is user {{ $user->id }}</p>
+                    @endforeach
+                -->
+
+                If you are in a nested loop, you may access the parent loop's $loop variable via the parent property:
+
+                <!--
+                    @foreach ($users as $user)
+                        @foreach ($user->posts as $post)
+                            @if ($loop->parent->first)
+                                This is first iteration of the parent loop.
+                            @endif
+                        @endforeach
+                    @endforeach
+                -->
+
+                The $loop variable also contains a variety of other useful properties:
+
+                Property                    Description
+                $loop->index                The index of the current loop iteration (starts at 0).
+                $loop->iteration            The current loop iteration (starts at 1).
+                $loop->remaining            The iterations remaining in the loop.
+                $loop->count                The total number of items in the array being iterated.
+                $loop->first                Whether this is the first iteration through the loop.
+                $loop->last                 Whether this is the last  iteration through the loop.
+                $loop->even                 Whether this is an  even  iteration through the loop.
+                $loop->odd                  Whether this is an  odd   iteration through the loop.
+                $loop->depth                The nesting level of the current loop.
+                $loop->parent               When in a nested loop, the parent's loop variable.
+
+            </theLoopVariable>
+            <comments>
+                Blade also allows you to define comments in your views. However, unlike HTML comments,
+                Blade comments are not included in the HTML returned by your application:
+
+                <!--
+                    {{-- This comment will not be present in the rendered HTML --}}
+                -->
+            </comments>
+            <PHP>
+                In some situations, it's useful to embed PHP code into your views. You can use the Blade @php
+                directive to execute a block of plain PHP within your template:
+
+                <!--
+                    @php
+                        //
+                    @endphp
+                -->
+
+                <NOTE>
+                    While Blade provides this feature, using it frequently may be a signal that you have too much
+                    logic embedded within your template.
+                </NOTE>
+            </PHP>
         </controlStructures>
         <forms>
-            <CSRFField></CSRFField>
-            <methodField></methodField>
-            <validationErrors></validationErrors>
+            <CSRFField>
+                Anytime you define an HTML form in your application, you should include a hidden CSRF token field in the
+                form so that the CSRF protection middleware can validate the request. You may use the @csrf        Blade
+                directive to generate the token field.
+            </CSRFField>
+            <methodField>
+                Since HTML forms can't make PUT, PATCH or DELETE request, you will need to add a hidden _method field to
+                spoof these HTTP verbs. The @method Blade directive can create this field for you:
+
+                <!--
+                    <form action="/foo/bar" method="POST">
+                        @method('PUT')
+
+                        ...
+                    </form>
+                -->
+            </methodField>
+            <validationErrors>
+                The @error directive may be used to quickly check if validation error messages exist for a given
+                attribute. Within an @error directive, you may echo the $message variable to display the   error
+                message:
+
+                <!-- /resources/views/post/create.blade.php -->
+                <!--
+                    <label for="title">Post Title</label>
+
+                    <input id="title" type="text" class="@error('title') is-invalid @enderror">
+
+                    @error('title')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
+                -->
+
+                You may pass the name of a specific error bag as the second parameter to the @error direvtive to
+                retrieve validation error messages on pages containing multiple forms:
+
+                <!--
+                    @error('email', 'login')
+                -->
+            </validationErrors>
         </forms>
         <includingSubviews>
-            <renderingViewsForCollections></renderingViewsForCollections>
+            Blade's @include directive allows you to include a Blade view from within another view. All variables that
+            are available to the parent view will be made available to the included view:
+
+            <!--
+                <div>
+                    @include('shared.errors')
+
+                    <form>
+                        //
+                    </form>
+                </div>
+            -->
+
+            Even thought the included view will inherit all data available in the parent view, you may also pass
+            an array of extra data to the included view:
+
+            <!--
+                @include('view.name', ['some' => 'data'])
+            -->
+
+            If you attempt to @include a view which does not exist, Laravel will throw an error. If you would like
+            to include a view that may or may not be present, you should use the @includeIf directive:
+
+            <!--
+                @includeIf('view.name', ['some' => 'data'])
+            -->
+
+            If you would like to @include a view if a given boolean expression evaluates to true, you may use the
+            @includeWhen directive:
+
+            <!--
+                @includeWhen($boolean, 'view.name', ['some' => 'data'])
+            -->
+
+            If you would like to @include a view if a given boolean expression evaluates to false, you may use the
+            @includUnless directive:
+
+            <!--
+                @includeUnless($boolean, 'view.name', ['some' => 'data'])
+            -->
+
+            To include the first view that exists from a given array of views, you may use the includeFirst directive:
+
+            <!--
+                @includeFirst(['custom.admin', 'admin'], ['some' => 'data'])
+            -->
+
+            <NOTE>
+                You should avoid using the __DIR__ and __FILE__ constants in your Blade views, since they will refer
+                to the location of the cached, compiled view.
+            </NOTE>
+
+            Aliasing Includes
+            If your Blade includes are stored in a subdirectory you may wish to alias them for easier    access.
+            For example, imagine a Blade include that is stored at resources/views/includes/input.blade.php with
+            the following content:
+
+            <!--
+                <input type="{{ $type ?? 'text' }}">
+            -->
+
+            You may use the include method to alias the include from includes.input to input. Typically, this should
+            be done in the boot method of your AppServiceProvider:
+
+            <!--
+                use Illuminate\Support\Facades\Blade;
+
+                Blade::include('includes.input', 'input');
+            -->
+
+            Once the include has been aliased, you may render it using the alias name as the Blade directive:
+
+            <!--
+                @input(['type' => 'email'])
+            -->
+
+            <renderingViewsForCollections>
+                You may combine loops and includes into one line with Blade's @each directive:
+
+                <!--
+                    @each('view.name', $jobs, 'job')
+                -->
+
+                The first argument is the view partial to render for each element in the array or collection. The   second
+                argument is the array or collection you wish to iterate over, while the third argument is the     variable
+                name that will be assigned to the current iteration within the view. So, for example, ify ou are iterating
+                over an array of jobs, typically you will want to access each job as a job bvariable within your      view
+                partial. The key for the current iteration will be available as the key variable within your view partial.
+
+                You may also pass a fourth argument to the @each directive. This argument determines the view that
+                will be rendered if the given array is empty.
+
+                <!--
+                    @each('view.name', $jobs, 'job', 'view.empty')
+                -->
+
+                <NOTE>
+                    Views rendered via @each do not inherit the variables from the parent view. If the child view requires
+                    these variables, you should use @foreach and @include instead.
+                </NOTE>
+            </renderingViewsForCollections>
         </includingSubviews>
-        <stacks></stacks>
-        <serviceInjection></serviceInjection>
+        <stacks>
+            Blade allows you to push to named stacks which can be rendered somewhere else in another view or layout.
+            This can be particularly useful for specifying any JavaScript libraries required by your child views:
+
+            <!--
+                @push('scripts')
+                    <script src="/example.js"></script>
+                @endpush
+            -->
+            You may push to a stack as many times as needed. To render the complete stack contents, pass the name of the
+            stack to the @stack directive:
+
+            <!--
+                <head>
+                    @stack('scripts')
+                </head>
+            -->
+
+            If you would like to prepend content onto the beginning of a stack, you should use the @prepend directive:
+
+            <!--
+                @push('scripts')
+                    This will be second...
+                @endpush
+
+                // Later..
+
+                @perpend('scripts')
+                    this will be first...
+                @endprepend
+            -->
+        </stacks>
+        <serviceInjection>
+            The @inject directive may be used to retrieve a service from the Laravel service container. The first
+            argument passed to @inject is the name of the variable the service will be placed into, while     the
+            second argument is the class or interface name of the service you wish to resolve:
+
+            <!--
+                @inject('metrics', 'App\Services\MetricsService')
+
+                <div>
+                    Monthly Revenue: {{ $metrics->monthlyRevenue() }}.
+                </div>
+            -->
+        </serviceInjection>
         <extendingBlade>
-            <customIfStatements></customIfStatements>
+            Blade allows you to define your own custom directives using the directive method. When the Blade  compiler
+            encounters the custom directive, it will call the provided callback with the expression that the directive
+            contains. The following example creates a @datetime($var) directive which formats a given $var,      which
+            should be an instance of DateTime:
+
+            <!--
+
+                namespace App\Providers;
+
+                use Illuminate\Support\Facades\Blade;
+                use Illuminate\Support\ServiceProvider;
+
+                class AppServiceProvider extends ServiceProvider
+                {
+                    /**
+                     * Register any application services.
+                     *
+                     * @return void
+                     */
+                    public function register()
+                    {
+                        //
+                    }
+
+                    /**
+                     * Bootstrap any application services.
+                     *
+                     * @return void
+                     */
+                    public function boot()
+                    {
+                        Blade::directive('datetime', function ($expression) {
+                            return "<?php echo ($expression)->format('m/d/Y H:i'); ?>";
+                        });
+                    }
+                }
+            -->
+
+            As you can, see we will chain the format method onto whatever expression is passed into the directive.
+            So, in this example, the final PHP generated by this directive will be:
+
+            <!--
+                <?php echo ($var)->format('m/d/Y H:i'); ?>
+            -->
+
+            <NOTE>
+                After updating the logic of a Blade directive, you will need to delete all of the cached Blade views.
+                The cached Blade views may be removed using the view:clear artisan command.
+            </NOTE>
+
+            <customIfStatements>
+                Programming a custom directive is sometimes more complex than necessary when defining simple, custom
+                conditional statements. For that reason, Blade provides a Blade:::if method which allows you      to
+                quickly define custom conditional directives using Closures. For example, let's define a      custom
+                conditional that checks the current application environment. We may do this in the boot method    of
+                our AppServiceProvider:
+
+                <!--
+                    use Illuminate\Support\Facades\Blade;
+
+                    /**
+                     * Bootstrap any application services.
+                     *
+                     * @return void
+                     */
+                    public function boot()
+                    {
+                        Blade::if('env', function ($environment) {
+                            return app()->environment($environment);
+                        });
+                    }
+                -->
+
+                Once ethe custom conditional has been defined, we can easily use it on our templates:
+
+                <!--
+                    @env('local')
+                        // The application is in the local environment...
+                    @elseenv('testing')
+                        // The application is in the testing environment...
+                    @else
+                        // The application is not in the local or testing environment...
+                    @endenv
+
+                    @unlessenv('production')
+                        // The application is not in the production environment...
+                    @endenv
+                -->
+            </customIfStatements>
         </extendingBlade>
     </bladeTemplates>
-    <localization></localization>
+
+    <localization>
+        <introduction>
+            Laravel's localization features provide a convenient way to retrieve strings in various languages, allowing
+            you to easily support multiple languages within your application. Language strings are stored in      files
+            within the resources/lang directory. Within this directory there should be a subdirectory for each language
+            supported by the application:
+
+            <!--
+                /resources
+                    /lang
+                        /en
+                            messages.php
+                        /ar
+                            messages.php
+            -->
+
+            All language files return an array of keyed strings. For example:
+
+            <!--
+                return [
+                    'welcome' => 'Welcome to our application'
+                ];
+
+            -->
+
+            <NOTE>
+                For languages that differ by territory, you should name the language directories according to
+                the ISO 15897. For example, "en_GB" should be used for British English rather than "en-gb".
+            </NOTE>
+            <configuringTheLocale>
+                The default language for your application is stored in the config/app.php file. You may modify
+                this value to suit the needs of your application. You may also change the active language   at
+                runtime using the setLocale method on The App facade:
+
+                <!--
+                    Route::get('welcome/{locale}', function ($locale) {
+                        App::setLocale($locale);
+                    });
+                -->
+
+                You may configure a "fallback language", which will be used when the active language does not
+                contain a given translation string. Like the default language, the fallback language is  also
+                configured in the config/app.php configuration file:
+
+                <!--
+                    'fallback_locale' => 'en',
+                -->
+
+                Determining The Current Locale
+                You may use the getLocale and isLocale methods on the App facade to determin the current locale or
+                check if the locale is a give value:
+
+                <!--
+                    $locale = App::getLocale();
+
+                    if (App::isLocale('en')) {
+                        //
+                    }
+                -->
+            </configuringTheLocale>
+        </introduction>
+        <definingTranslationStrings>
+            <usingShortKeys>
+                Typically, translation strings are stored in files within the reources/lang directory. Within this
+                directory there should be a subdirectory for each language supported by the application:
+
+                <!--
+                    /resources
+                        /lang
+                            /en
+                                messages.php
+                            /es
+                                messages.php
+                -->
+
+                All language files return an array of keyed strings.
+            </usingShortKeys>
+            <usingTranslationStringsAsKeys>
+                For applications with heavy translation requirements, defining every string with a "short key"   can
+                become quickly confusing when referencing them in your views. For this reason, Laravel also provides
+                support for defining translation strings using the "default" translation of the string as the key.
+
+                Translation files that use translation strings as keys are stored as JSON files in the resources/lang
+                directory. For example, if your application has a Spanish translation, you should create            a
+                resources/lang/es.json file:
+
+                <!--
+                    {
+                        "I love programming.": "Me encanta programar."
+                    }
+                -->
+            </usingTranslationStringsAsKeys>
+        </definingTranslationStrings>
+        <retrievingTranslationStrings>
+            You may retrieve lines from language files using the __ helper function. The __ method accepts the file and
+            key of the translation string as its first argument. For example, let's retrieve the welcom     translation
+            string from the resources/lang/messages.php language file:
+
+            <!--
+                echo __('messages.welcome');
+
+                echo __('I love programming.');
+            -->
+
+            If you are using the Blade templating engine, you may use the {{}} syntax to echo the translation string
+            or use the @lang directive:
+
+            <!--
+                {{ __('messages.welcome') }}
+
+                @lang('messages.welcome')
+            -->
+
+            If the specified translation string does not exist, the __ function will return the translation   string
+            key. So, using the esample above, the __function would return messages.welcome if the translation string
+            does not exist.
+
+            <NOTE>
+                The @lang directive does not escape any output. You are fully responsible for escaping your own
+                output when using this directive
+            </NOTE>
+            <replacingParametersInTranslationStrings>
+                If you wish, you may define placeholders in your translation strings. All placceholders are prefixed
+                with a : . For example, you may define a welcome message with a placeholder name:
+
+                <!--
+                    'welcome' => 'Welcome, :name',
+                    echo __('messages.welcome', ['name' => 'dayle']);
+                -->
+
+                If your placeholder contains all capital letters, or only has its first letter capitalize, the translated
+                value will be capitalized accordingly:
+
+                <!--
+                    'welcome' => 'Welcome, :NAME', // Welcome, DAYLE
+                    'goodbye' => 'Goodbye, :Name', // Goodbye, Dayle
+                -->
+            </replacingParametersInTranslationStrings>
+            <pluralization>
+                Pluralization is a complex problem, as different languages have a variety of complex rules for pluralization.
+                By using a "pipe" character, you may distinguish singular and plural forms of a string
+            </pluralization>
+        </retrievingTranslationStrings>
+        <overridingPackageLanguageFiles></overridingPackageLanguageFiles>
+    </localization>
     <frontendScaffolding></frontendScaffolding>
     <compilingAssets></compilingAssets>
 </frontend>
@@ -6904,7 +7519,6 @@
     <socialite></socialite>
     <telescope></telescope>
 </officialPackages>
-
 
 
 
